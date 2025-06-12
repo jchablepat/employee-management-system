@@ -4,9 +4,9 @@ Un sistema completo de gestión de empleados desarrollado con tecnologías moder
 
 ## 🚀 Demo en Vivo
 
-- **🌐 Aplicación Frontend**: [Ver Demo](https://employees-g5cthjhuemhjfdc0.canadacentral-01.azurewebsites.net){:target="_blank"}
-- **🔧 API Backend**: [Endpoint](https://employees-api-ajc5czd6f2h0a5ee.canadacentral-01.azurewebsites.net){:target="_blank"}
-- **📚 Documentación API**: [Swagger UI](https://employees-api-ajc5czd6f2h0a5ee.canadacentral-01.azurewebsites.net/swagger/index.html){:target="_blank"}
+- **🌐 Aplicación Frontend**: (Ver Demo)(https://employees-g5cthjhuemhjfdc0.canadacentral-01.azurewebsites.net/){:target="_blank" rel="noopener"}
+- **🔧 API Backend**: [Endpoint](https://employees-api-ajc5czd6f2h0a5ee.canadacentral-01.azurewebsites.net){:target="_blank" rel="noopener"}
+- **📚 Documentación API**: [Swagger UI](https://employees-api-ajc5czd6f2h0a5ee.canadacentral-01.azurewebsites.net/swagger/index.html){:target="_blank" rel="noopener"}
 
 ## 🛠️ Stack Tecnológico
 
@@ -18,13 +18,11 @@ Un sistema completo de gestión de empleados desarrollado con tecnologías moder
 ### Backend
 - **ASP.NET Core Web API** con .NET 8
 - **Entity Framework Core** para acceso a datos
-- **MySQL** como base de datos
+- **MySQL** como base de datos (Cualquier Servicio de terceros)
 - **JWT Authentication** con refresh tokens
-- **AutoMapper** para mapeo de objetos
 
 ### Infraestructura
 - **Azure App Services** para despliegue
-- **Azure MySQL** para base de datos en la nube
 
 ## ✨ Características Principales
 
@@ -73,7 +71,7 @@ EmployeeManagementSystem/
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/tu-usuario/employee-management-system.git
+   git clone https://github.com/jchablepat/employee-management-system.git
    cd employee-management-system
    ```
 
@@ -90,17 +88,17 @@ EmployeeManagementSystem/
 
 3. **Ejecutar migraciones**
    ```bash
-   dotnet ef database update --project EmployeeManagement.Api
+   dotnet ef database update --project EmployeeManagementSystem.ServerLibrary
    ```
 
 4. **Ejecutar el proyecto**
    ```bash
    # Terminal 1 - API Backend
-   cd src/EmployeeManagement.Api
+   cd src/EmployeeManagementSystem.Server
    dotnet run
    
    # Terminal 2 - Frontend
-   cd src/EmployeeManagement.Client
+   cd src/EmployeeManagementSystem.Client
    dotnet run
    ```
 
@@ -115,8 +113,7 @@ EmployeeManagementSystem/
   "JwtSettings": {
     "Key": "tu-clave-secreta-jwt",
     "Issuer": "EmployeeManagement",
-    "Audience": "EmployeeManagement",
-    "DurationInMinutes": 60
+    "Audience": "EmployeeManagement"
   }
 }
 ```
