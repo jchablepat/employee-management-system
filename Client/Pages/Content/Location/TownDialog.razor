@@ -1,0 +1,75 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="@Title">
+	<ChildContent>
+			<EditForm Model="Town" Enhance OnSubmit="Save">
+				<div class="card border-success">
+					<div class="card-body">
+						<div class="form-group mb-2">
+							<label class="form-label">Id</label>
+							<input class="form-control" @bind="Town.Id" disabled />
+						</div>
+						<div class="form-group mb-3">
+							<label class="form-label">Name</label>
+							<InputText class="form-control" @bind-Value="Town.Name" />
+						</div>
+
+						<div class="form-group mt-2">
+							@if (Town.City != null)
+							{
+								<MudSelect T="string" Label="Select city" Value="Town.CityId.ToString()" ValueChanged="OnValueChange">
+									@foreach (var city in Cities)
+									{
+										<MudSelectItem Value="@city.Id.ToString()">@city.Name</MudSelectItem>
+									}
+								</MudSelect>
+							}
+							else
+							{
+								<MudSelect T="string" Label="Select city" ValueChanged="OnValueChange">
+									@foreach (var city in Cities)
+									{
+										<MudSelectItem Value="@city.Id.ToString()">@city.Name</MudSelectItem>
+									}
+								</MudSelect>
+							}
+						</div>
+					</div>
+				</div>
+			</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+@code {
+	[Parameter] public Town Town { get; set; } = new();
+	[Parameter] public List<City> Cities { get; set; } = new();
+	[Parameter] public EventCallback<Town> OnTownAdded { get; set; } // Callback to notify save operation event to parent component
+
+	private bool IsVisible { get; set; } = false;
+	private string Title { get; set; } = "Add Town";
+
+	private async void Save()
+	{
+		if (string.IsNullOrEmpty(Town.Name))
+			await alertService.ShowErrorToast("You need to provide a town name");
+		else
+			await OnTownAdded.InvokeAsync(Town);
+	}
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void ChangeTitle(string title)
+	{
+		Title = title;
+		StateHasChanged();
+	}
+
+	public void OnValueChange(string value)
+	{
+		Town.CityId = int.Parse(value);
+	}
+}

@@ -1,0 +1,139 @@
+﻿@page "/identity/account/login"
+@layout AuthenticationLayout
+
+<EditForm Enhance Model="User" OnValidSubmit="HandleLogin" class="login-form">
+	<DataAnnotationsValidator />
+
+	<div class="card login-card">
+		<div class="card-body">
+			<h3 class="text-center mb-4">Bienvenido</h3>
+
+			<div class="form-group mb-3">
+				<label for="Input_Email">Email</label>
+				<div class="input-group">
+					<span class="input-group-text"><i class="bi bi-envelope"></i></span>
+					<InputText id="Input_Email" class="form-control" @bind-Value="User.Email" placeholder="nombre@ejemplo.com" />
+				</div>
+				<ValidationMessage For="@(() => User.Email)" class="text-danger" />
+			</div>
+
+			<div class="form-group mb-4">
+				<label for="Input_Password">Password</label>
+				<div class="input-group">
+					<span class="input-group-text"><i class="bi bi-lock"></i></span>
+					<input type="password" id="Input_Password" class="form-control" @bind="User.Password" placeholder="••••••••" />
+				</div>
+				<ValidationMessage For="@(() => User.Password)" class="text-danger" />
+			</div>
+
+			<div class="d-grid gap-2">
+				@if (IsLoading)
+				{
+					<ButtonLoading />
+				} else {
+					<button type="submit" class="btn btn-primary btn-lg">Login</button>
+				}
+			</div>
+
+			<div class="text-center mt-4">
+				<span class="text-center">Don´t you have account?</span>
+				<a href="identity/account/register" class="text-primary text-decoration-none">Sign Up</a>
+			</div>
+			<ValidationSummary class="text-danger mt-3"/>
+		</div>
+	</div>
+</EditForm>
+
+<style>
+    .login-form {
+        width: 100%;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-card h3 {
+        color: #333;
+        font-weight: 600;
+    }
+
+    .form-group label {
+        color: #555;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .input-group-text {
+        background-color: transparent;
+        border-right: none;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+    }
+
+    .input-group .form-control:focus {
+        box-shadow: none;
+        border-color: #ced4da;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+        border: none;
+        padding: 12px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+    }
+</style>
+
+@code {
+	[CascadingParameter]
+	public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+	Login User = new Login();
+	public bool IsLoading { get; set; } = false;
+
+	protected async override Task OnInitializedAsync()
+	{
+		var user = (await AuthenticationState).User;
+		var IsAuthenticated = user.Identity!.IsAuthenticated;
+		if (IsAuthenticated)
+			NavManager.NavigateTo("/home/dashboard");
+	}
+
+	async Task HandleLogin()
+	{
+		IsLoading = true;
+		var result = await accountService.SignInAsync(User);
+
+		if(result!.Flag) {
+			await DisplayDialog(result.Message, "Login Success", "success");
+			var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
+			await customAuthStateProvider.UpdateAuthenticationState(new UserSession() { Token = result.Token, RefreshToken = result.RefreshToken });
+			NavManager.NavigateTo("/", forceLoad: true);
+		}
+		else
+		{
+			await DisplayDialog(result.Message, "Login Failed", "error");
+		}
+
+		IsLoading = false;
+	}
+
+	async Task DisplayDialog(string content, string title, string icon = "info")
+	{
+		// await dialogService.AlertAsync(content, title);
+		await alertService.ShowToast(content, icon);
+	}
+}

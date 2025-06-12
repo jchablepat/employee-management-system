@@ -1,0 +1,156 @@
+﻿@implements IDisposable
+
+@if(allState.ShowGeneralDepartment)
+{
+	<div class="container mt-5">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="card">
+					<div class="card-header">
+						<h4 class="float-start">General Department</h4>
+						<button class="btn btn-outline-success float-end" @onclick="AddButtonClicked">
+							<i class="bi bi-plus-circle-dotted"></i> Add Department
+						</button>
+					</div>
+				</div>
+				<div class="card-header">
+					<div class="card-body">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th scope="col">#</th>
+									<th scope="col">Id</th>
+									<th scope="col">General Department</th>
+									<th scope="col">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								@if(GeneralDepartments is not null)
+								{
+									int count = 1;
+									foreach(var item in GeneralDepartments)
+									{
+										<tr>
+											<th scope="row">@count</th>
+											<th scope="row">@item.Id</th>
+											<th scope="row">@item.Name</th>
+											<td>
+												<i class="bi bi-pencil text-info" id="cursorStyle" @onclick="() => EditClicked(item)"></i>
+												<i class="bi bi-trash text-danger" id="cursorStyle2" @onclick="() => DeleteClicked(item)"></i>
+											</td>
+										</tr>
+										count++;
+									}
+								}
+								else
+								{
+									<tr>
+										<td colspan="4">
+											<div class="alert alertalert-info text-center">
+												No General Department added yet!
+											</div>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+<GralDepartmentDialog @ref="gralDptDialog" OnGralDepartmentAdded="HandleSaveEvent" GeneralDepartment="GeneralDepartment" />
+
+@code {
+	GralDepartmentDialog? gralDptDialog;
+	GeneralDepartment GeneralDepartment = new();
+	List<GeneralDepartment> GeneralDepartments { get; set; } = new();
+
+	protected async override Task OnInitializedAsync()
+	{
+		await GetGeneralDepartments();
+		allState.Action += StateHasChanged;
+	}
+
+	private async Task GetGeneralDepartments()
+	{
+		GeneralDepartments = await generalDepartmentService.GetAll(Constants.GeneralDepartmentBaseUrl);
+	}
+
+	private void AddButtonClicked()
+	{
+		gralDptDialog?.ChangeTitle("Add Department");
+		GeneralDepartment = new();
+		OpenDialog();
+	}
+
+	private void OpenDialog()
+	{
+		gralDptDialog?.OpenDialog();
+	}
+
+	// Save or update
+	private async Task HandleSaveEvent(GeneralDepartment generalDepartment)
+	{
+		bool isValid = false;
+		if (generalDepartment.Id > 0) {
+			var result = await generalDepartmentService.Update(generalDepartment, Constants.GeneralDepartmentBaseUrl);
+			isValid = await DisplayMessage(result.Flag, result.Message);
+		}
+		else {
+			var result = await generalDepartmentService.Insert(generalDepartment, Constants.GeneralDepartmentBaseUrl);
+			isValid = await DisplayMessage(result.Flag, result.Message);
+		}
+
+		if (isValid)
+		{
+			GeneralDepartment = new();
+			await GetGeneralDepartments();
+			gralDptDialog?.ChangeTitle("Add Department");
+		}
+	}
+
+	// Edit
+	private void EditClicked(GeneralDepartment generalDepartment)
+	{
+		gralDptDialog?.ChangeTitle("Edit Department");
+		GeneralDepartment = generalDepartment;
+		OpenDialog();
+	}
+
+	private async Task DeleteClicked(GeneralDepartment generalDepartment) {
+		// bool confirm = await dialogService.ConfirmAsync($"Are you sure you wanna delete {generalDepartment.Name}?", "Confirm Delete");
+		bool confirm = await alertService.ShowConfirmation("Confirm Delete", $"Are you sure you wanna delete {generalDepartment.Name}?");
+
+		if (!confirm) return;
+
+		var response = await generalDepartmentService.Delete(generalDepartment.Id, Constants.GeneralDepartmentBaseUrl);
+		if(await DisplayMessage(response.Flag, response.Message))
+		{
+			await GetGeneralDepartments();
+		}
+	}
+
+	private async Task<bool> DisplayMessage(bool flag, string message)
+	{
+		if (flag)
+		{
+			// await dialogService.AlertAsync(message, "Success operation!");
+			await alertService.ShowSuccessToast(message);
+			return true;
+		}
+		else
+		{
+			// await dialogService.AlertAsync(message, "Error!");
+			await alertService.ShowErrorToast(message);
+			return false;
+		}
+	}
+
+	public void Dispose()
+	{
+		allState.Action -= StateHasChanged;
+	}
+}

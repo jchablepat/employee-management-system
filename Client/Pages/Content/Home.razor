@@ -1,0 +1,25 @@
+﻿@page "/home/dashboard"
+
+<TableBanner />
+<GralDepartment />
+<DepartmentPage />
+<BranchPage />
+<CountryPage />
+<CityPage />
+<TownPage />
+<UserPage />
+@* 
+<EmployeePage /> *@
+
+@code {
+	[CascadingParameter]
+	public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+	protected async override Task OnInitializedAsync()
+	{
+		var user = (await AuthenticationState).User;
+		var IsAuthenticated = user.Identity!.IsAuthenticated;
+		if (!IsAuthenticated)
+			NavManager.NavigateTo("/identity/account/login");
+	}
+}

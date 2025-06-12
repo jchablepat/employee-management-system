@@ -1,0 +1,68 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="Agregar usuario">
+	<ChildContent>
+			<EditForm Model="ManageUser" Enhance OnSubmit="Save">
+				<div class="card border-success">
+					<div class="card-body">
+						<div class="form-group mb-2">
+							<label class="form-label">Name</label>
+							<input class="form-control" @bind="ManageUser.Name" disabled />
+						</div>
+						<div class="form-group mb-2">
+							<label class="form-label">Email</label>
+							<InputText class="form-control" @bind-Value="ManageUser.Email" disabled />
+						</div>
+
+						<div class="form-group mb-3">
+							@if (string.IsNullOrEmpty(ManageUser.Role))
+							{
+								<MudSelect T="string" Label="Select role" Value="ManageUser.Role" ValueChanged="OnValueChange">
+									@foreach (var role in SystemRoles)
+									{
+										<MudSelectItem Value="@role.Name">@role.Name</MudSelectItem>
+									}
+								</MudSelect>
+							}
+							else
+							{
+								<MudSelect T="string" Label="Select role" ValueChanged="OnValueChange">
+									@foreach (var role in SystemRoles)
+									{
+										<MudSelectItem Value="@role.Id.ToString()">@role.Name</MudSelectItem>
+									}
+								</MudSelect>
+							}
+						</div>
+					</div>
+				</div>
+			</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+@code {
+	[Parameter] public ManageUser ManageUser { get; set; } = new();
+	[Parameter] public List<SystemRole> SystemRoles { get; set; } = new();
+	[Parameter] public EventCallback<ManageUser> OnUserAdded { get; set; } // Callback to notify save operation event to parent component
+
+	private bool IsVisible { get; set; } = false;
+
+	private async void Save()
+	{
+		if (string.IsNullOrEmpty(ManageUser.Name) || string.IsNullOrEmpty(ManageUser.Role))
+			await alertService.ShowErrorToast("You need to provide a role name");
+		else
+			await OnUserAdded.InvokeAsync(ManageUser);
+	}
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void OnValueChange(string value)
+	{
+		ManageUser.Role = value;
+	}
+}

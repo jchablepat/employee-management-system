@@ -1,0 +1,34 @@
+@if (IsVisible)
+{
+    <div class="modal-overlay">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h4>@Title</h4>
+                <button type="button" class="close-button" @onclick="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+            <div class="modal-footer">
+                @if (ShowFooter)
+                {
+                    @FooterContent
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public bool ShowFooter { get; set; } = true;
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    private async Task Close()
+    {
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+}

@@ -1,0 +1,207 @@
+﻿@page "/identity/account/register"
+@layout AuthenticationLayout
+
+<EditForm Enhance Model="User" OnValidSubmit="HandleRegistration">
+    <DataAnnotationsValidator />
+
+    <div class="register-card">
+        <div class="register-header">
+            <h2>Create account</h2>
+            <p>Enter your data to register</p>
+        </div>
+        <div class="register-body">
+            <div class="form-floating mb-3">
+                <InputText id="Input_Email" class="form-control" @bind-Value="User.Fullname" />
+                <label for="Input_Email">Fullname</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText id="Input_Email" class="form-control" @bind-Value="User.Email" />
+                <label for="Input_Email">Email</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="password" id="Input_Password" class="form-control" @bind="User.Password" />
+                <label for="Input_Password">Password</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="password" id="Input_CPassword" class="form-control" @bind="User.ConfirmPassword" />
+                <label for="Input_CPassword">Confirm Password</label>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                @if (IsLoading)
+                {
+                    <ButtonLoading />
+                } else
+                {
+                    <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                }
+            </div>
+        </div>
+        <div class="register-footer">
+            <p>Already have an account? <a href="identity/account/login">Sign In</a></p>
+            <ValidationSummary />
+        </div>
+    </div>
+</EditForm>
+<style>
+    .register-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 2.5rem;
+    width: 100%;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .register-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .register-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    }
+
+    .register-header h2 {
+    color: #1a365d;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    font-size: 2rem;
+    }
+
+    .register-header p {
+    color: #4a5568;
+    margin-bottom: 0;
+    font-size: 1rem;
+    }
+
+    .register-body {
+    padding: 1rem 0;
+    }
+
+    .form-floating > .form-control {
+    border-radius: 0.75rem;
+    border: 2px solid #e2e8f0;
+    padding: 1rem 0.75rem;
+    height: calc(3.5rem + 2px);
+    line-height: 1.25;
+    transition: all 0.2s ease-in-out;
+    }
+
+    .form-floating > .form-control:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.15);
+    outline: none;
+    }
+
+    .form-floating > label {
+    padding: 1rem 0.75rem;
+    }
+
+    .btn-primary {
+    background: linear-gradient(135deg, #4299e1 0%, #2b6cb0 100%);
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    padding: 1rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    }	
+
+    .btn-primary:hover {
+    background: linear-gradient(135deg, #2b6cb0 0%, #2c5282 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+    }
+
+    .register-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e2e8f0;
+    }
+
+    .register-footer p {
+    color: #4a5568;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    }
+
+    .register-footer a {
+    color: #4299e1;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+    }
+
+    .register-footer a:hover {
+    color: #2b6cb0;
+    text-decoration: underline;
+    }
+
+    .validation-message {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+    }
+
+    .validation-errors {
+    text-align:left;
+    }
+
+    /* Animaciones */
+    @@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+    }
+
+    .register-card {
+    animation: fadeIn 0.6s ease-out;
+    }
+</style>
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+    Register User = new Register();
+    public bool IsLoading { get; set; } = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var user = (await AuthenticationState).User;
+        var IsAuthenticated = user.Identity!.IsAuthenticated;
+        if (IsAuthenticated)
+            NavManager.NavigateTo("/home/dashboard");
+    }
+
+    async Task HandleRegistration()
+    {
+        IsLoading = true;
+        var result = await accountService.CreateAsync(User);
+
+        if (result!.Flag)
+        {
+            await DisplayDialog(result.Message, "Registration Success", "success");
+            User = new();
+        }
+        else {
+            await DisplayDialog(result.Message, "Registration Failed", "error");
+        }
+
+        IsLoading = false;
+    }
+
+    async Task DisplayDialog(string content, string title, string icon = "info")
+    {
+        // await dialogService.AlertAsync(content, title);
+        await alertService.ShowToast(content, icon);
+    }
+}

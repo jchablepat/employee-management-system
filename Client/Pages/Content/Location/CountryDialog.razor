@@ -1,0 +1,49 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="@Title">
+	<ChildContent>
+			<EditForm Model="Country" Enhance OnSubmit="Save">
+				<div class="card border-success">
+					<div class="card-body">
+						<div class="form-group">
+							<label class="form-label">Id</label>
+							<input class="form-control" @bind="Country.Id" disabled />
+						</div>
+						<div class="form-group">
+							<label class="form-label">Name</label>
+							<InputText class="form-control" @bind-Value="Country.Name" />
+						</div>
+					</div>
+				</div>
+			</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+
+@code {
+	[Parameter] public Country Country { get; set; } = new();
+	[Parameter] public EventCallback<Country> OnCountryAdded { get; set; } // Callback to notify save operation event to parent component
+
+	private bool IsVisible { get; set; } = false;
+	private string Title { get; set; } = "Add Country";
+
+	private async void Save()
+	{
+		if (string.IsNullOrEmpty(Country.Name))
+			await alertService.ShowErrorToast("You need to provide a Country name");
+		else
+			await OnCountryAdded.InvokeAsync(Country);
+	}
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void ChangeTitle(string title)
+	{
+		Title = title;
+		StateHasChanged();
+	}
+}

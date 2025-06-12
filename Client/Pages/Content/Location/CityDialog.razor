@@ -1,0 +1,78 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="@Title">
+	<ChildContent>
+			<EditForm Model="City" Enhance OnSubmit="Save">
+				<div class="card border-success">
+					<div class="card-body">
+						<div class="form-group">
+							<label class="form-label">Id</label>
+							<input class="form-control" @bind="City.Id" disabled />
+						</div>
+						<div class="form-group">
+							<label class="form-label">Name</label>
+							<InputText class="form-control" @bind-Value="City.Name" />
+						</div>
+
+						<div class="form-group mt-3 mb-3">
+							@if (City.Country != null)
+							{
+								<MudSelect T="string" Label="Select country" Value="City.CountryId.ToString()" ValueChanged="OnValueChange">
+									@foreach (var country in Countries)
+									{
+										<MudSelectItem Value="@country.Id.ToString()">@country.Name</MudSelectItem>
+									}
+								</MudSelect>
+							}
+							else
+							{
+								<MudSelect T="string" Label="Select country" ValueChanged="OnValueChange">
+									@foreach (var country in Countries)
+									{
+										<MudSelectItem Value="@country.Id.ToString()">@country.Name</MudSelectItem>
+									}
+								</MudSelect>
+							}
+						</div>
+					</div>
+				</div>
+			</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+@code {
+	[Parameter] public City City { get; set; } = new();
+	[Parameter] public List<Country> Countries { get; set; } = new();
+	[Parameter] public EventCallback<City> OnCityAdded { get; set; } // Callback to notify save operation event to parent component
+
+	private bool IsVisible { get; set; } = false;
+	private string Title { get; set; } = "Add City";
+
+	private async void Save()
+	{
+		if (string.IsNullOrEmpty(City.Name))
+			await alertService.ShowErrorToast("You need to provide a city name");
+		else
+			await OnCityAdded.InvokeAsync(City);
+	}
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void ChangeTitle(string title)
+	{
+		Title = title;
+		StateHasChanged();
+	}
+
+	private void OnValueChange(string value)
+	{
+		if (int.TryParse(value, out int id))
+		{
+			City.CountryId = id;
+		}
+	}
+}

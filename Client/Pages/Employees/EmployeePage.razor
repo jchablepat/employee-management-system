@@ -1,0 +1,74 @@
+﻿@implements IDisposable
+@if(allState.ShowEmployee)
+{
+	if(ShowMainPage)
+	{
+		<div class="container-fluid mt-5">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card">
+						<div class="card-header">
+							<button class="btn btn-outline-success float-end" @onclick="ShowAddOrUpdateEmployeeClicked">
+								<i class="bi bi-plus-circle-dotted"></i> Add Employee
+							</button>
+						</div>
+						<div class="card-body">
+							<SfGrid DataSource="@Employees" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
+								<GridColumns>
+									<GridColumn HeaderText="Employee Image">
+										<Template>
+											@{
+												var employee = (Employee)context;
+												<div class="image">
+													<img src="@employee!.Photo" alt="@employee.Name" width="150" height="150" />	
+												</div>
+											}
+										</Template>
+									</GridColumn>
+									<GridColumn Field="@nameof(Employee.CivilId)" HeaderText="Civil Id" IsPrimaryKey="true" />
+									<GridColumn Field="@nameof(Employee.FileNumber)" HeaderText="File Number" />
+									<GridColumn Field="@nameof(Employee.Name)" HeaderText="Name" />
+									<GridColumn Field="@nameof(Employee.TelephoneNumber)" HeaderText="Telephone" />
+									<GridColumn Field="@nameof(Employee.JobName)" HeaderText="Job Name" />
+									<GridColumn Field="@nameof(Employee.Branch.Name)" HeaderText="Branch" />
+									<GridColumn Field="@nameof(Employee.Town.Name)" HeaderText="Town" />
+								</GridColumns>
+							</SfGrid>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+<AddOrUpdateEmployeePage ShowAddOrUPdateEmployee="ShowAddOrUpdatePage" />
+
+@code {
+	public List<Employee> Employees { get; set; } = new();
+
+	protected async override Task OnInitializedAsync()
+	{
+		allState.Action += StateHasChanged;
+		await GetEmployees();
+	}
+
+	private async Task GetEmployees()
+	{
+		Employees = await employeeService.GetAll(Constants.EmployeeBaseUrl);
+	}
+
+	public void Dispose()
+	{
+		allState.Action -= StateHasChanged;
+	}
+
+	public bool ShowMainPage { get; set; } = true;
+	public bool ShowAddOrUpdatePage { get; set; } = false;
+
+	private void ShowAddOrUpdateEmployeeClicked()
+	{
+		ShowMainPage = false;
+		ShowAddOrUpdatePage = true;
+	}
+}
