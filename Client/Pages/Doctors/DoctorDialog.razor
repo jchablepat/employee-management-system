@@ -1,0 +1,53 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="Add Employee Health Issue">
+	<ChildContent>
+		<EditForm Model="Doctor" Enhance OnSubmit="Save">
+			<div class="card border-success">
+				<div class="card-body">
+					<div class="form-group">
+						<label class="form-label">Employee ID</label>
+						<input type="text" class="form-control" @bind="Doctor.EmployeeId" disabled />
+					</div>
+
+					<div class="form-group mt-2">
+						<label class="form-label">Date</label>
+						<InputDate class="form-control" @bind-Value="Doctor.Date" />
+					</div>
+
+					<div class="form-group mt-2">
+						<label class="form-label">Medical Diagnose</label>
+						<InputTextArea class="form-control" @bind-Value="Doctor.MedicalDiagnose" />
+					</div>
+
+					<div class="form-group mt-2">
+						<label class="form-label">Recommendation</label>
+						<InputTextArea class="form-control" @bind-Value="Doctor.MedicalRecommendation" />
+					</div>
+				</div>
+			</div>
+		</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+
+@code {
+	public string Title { get; set; } = "Add Employee Health Issue";
+	[Parameter] public Doctor Doctor { get; set; } = new();
+	[Parameter] public EventCallback<Doctor> HandleSaveOperationEvent { get; set; }
+	private bool IsVisible { get; set; } = false;
+	private async void Save() => await HandleSaveOperationEvent.InvokeAsync(Doctor);
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void CloseDialog()
+	{
+		IsVisible = false;
+		StateHasChanged();
+	}
+
+	public void ChangeTitle(string title) => Title = title;
+}

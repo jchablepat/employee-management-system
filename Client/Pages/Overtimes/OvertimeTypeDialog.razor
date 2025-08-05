@@ -1,0 +1,49 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="@Title">
+	<ChildContent>
+		<EditForm Model="OvertimeType" Enhance OnSubmit="Save">
+			<div class="card border-success">
+				<div class="card-body">
+					<div class="form-group">
+						<label class="form-label">Name</label>
+						<InputText @bind-Value="OvertimeType.Name" class="form-control" />
+					</div>
+				</div>
+			</div>
+		</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+
+@code {
+	[Parameter] public OvertimeType OvertimeType { get; set; } = new();
+	[Parameter] public EventCallback<OvertimeType> HandleSaveOperationEvent { get; set; }
+	public string Title { get; set; } = "Add Overtime Type";
+	private bool IsVisible { get; set; } = false;
+
+	private async void Save()
+	{
+		if (string.IsNullOrEmpty(OvertimeType.Name))
+		{
+			await alertService.ShowError("Please insert an overtime type.");
+			return;
+		}
+
+		await HandleSaveOperationEvent.InvokeAsync(OvertimeType);
+	}
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void CloseDialog()
+	{
+		IsVisible = false;
+		StateHasChanged();
+	}
+
+	public void ChangeTitle(string title) => Title = title;
+}

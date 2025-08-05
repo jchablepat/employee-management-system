@@ -1,0 +1,132 @@
+﻿@implements IDisposable
+@if (allState.ShowHealth)
+{
+	<div class="container mt-5">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="card border-warning shadow-lg">
+					<div class="card-header">
+						<h4 class="float-start">Health Information</h4>
+					</div>
+
+					<div class="card-header" style="max-height:580px;overflow-x:hidden;overflow-y:scroll">
+						<div class="card-body">
+							<div class="mb-4">
+								<button class="btn btn-sm btn-success mr-1" @onclick="ExportToExcel">
+									<span class="bi bi-file-earmark-excel"></span>
+									Excel Export
+								</button>
+								<button class="btn btn-sm btn-primary" @onclick="ExportToPdf">
+									<span class="bi bi-file-earmark-pdf-fill"></span>
+									Pdf Export
+								</button>
+							</div>
+
+							<MudTable Items="@Doctors" Dense="true" Hover="true" Bordered="true" Striped="false">
+								<HeaderContent>
+									<MudTh>Employee ID</MudTh>
+									<MudTh>Medical Diagnose</MudTh>
+									<MudTh>Recommendation</MudTh>
+									<MudTh>Date</MudTh>
+									<MudTh>Actions</MudTh>
+								</HeaderContent>
+								<RowTemplate>
+									<MudTd DataLabel="Employee ID">@context.EmployeeId</MudTd>
+									<MudTd DataLabel="Type">@context?.MedicalDiagnose</MudTd>
+									<MudTd DataLabel="Start Date">@context.MedicalRecommendation</MudTd>
+									<MudTd DataLabel="End Date">@context.Date</MudTd>
+									<MudTd DataLabel="Actions">
+										<div>
+											<i class="bi bi-pencil text-info" @onclick="() => EditClicked(context!)" style="cursor:pointer;"></i>
+											<i class="bi bi-trash text-danger" @onclick="() => DeleteClicked(context!)" style="cursor:pointer;"></i>
+										</div>
+									</MudTd>
+								</RowTemplate>
+								<PagerContent>
+									<MudTablePager />
+								</PagerContent>
+							</MudTable>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+<DoctorDialog @ref="doctorDialog" Doctor="@Doctor" HandleSaveOperationEvent="HandleSaveOperationEvent" />
+
+@code {
+	DoctorDialog? doctorDialog;
+	Doctor Doctor { get; set; } = new();
+	public List<Doctor> Doctors { get; set; } = new();
+
+	protected async override Task OnInitializedAsync()
+	{
+		// Initialization logic can be added here if needed
+		await GetHealth();
+		allState.Action += StateHasChanged;
+	}
+
+	private async Task GetHealth() => Doctors = await doctorService.GetAll(Constants.DoctorBaseUrl);
+
+	void AddButtonClicked()
+	{
+		Doctor = new Doctor();
+		OpenDialog();
+	}
+
+	void OpenDialog() => doctorDialog?.OpenDialog();
+
+	private async Task HandleSaveOperationEvent(Doctor doctor)
+	{
+		var result = await doctorService.Update(doctor, Constants.DoctorBaseUrl);
+		bool successCheck = await DisplayMessage(result.Flag, result.Message);
+		if (successCheck)
+		{
+			Doctor = new Doctor();
+			await GetHealth();
+		}
+	}
+
+	private void EditClicked(Doctor doctor)
+	{
+		Doctor = doctor;
+		doctorDialog?.ChangeTitle("Edit Doctor");
+		OpenDialog();
+	}
+
+	private async Task DeleteClicked(Doctor doctor)
+	{
+		var confirmResult = await alertService.ShowConfirmation("Are you sure you wanna delete this?", "Confirm Delete");
+		if (!confirmResult) return; // User cancelled the deletion
+
+		var result = await doctorService.Delete(doctor.Id, Constants.DoctorBaseUrl);
+		bool successCheck = await DisplayMessage(result.Flag, result.Message);
+		if (successCheck)
+		{
+			await GetHealth();
+		}
+	}
+
+	// Display message using Alert Service
+	private async Task<bool> DisplayMessage(bool flag, string message)
+	{
+		if (flag)
+		{
+			await alertService.ShowSuccessToast(message);
+			return true;
+		}
+		else
+		{
+			await alertService.ShowErrorToast(message);
+			return false;
+		}
+	}
+
+	public void Dispose() => allState.Action -= StateHasChanged;
+
+	// Excel export / PDF Export
+	private async Task ExportToExcel() => await ExcelService.Export(Doctors, "Doctors.xlsx");
+	private async Task ExportToPdf() => await PdfService.Export(Doctors, "Doctors.pdf");
+}

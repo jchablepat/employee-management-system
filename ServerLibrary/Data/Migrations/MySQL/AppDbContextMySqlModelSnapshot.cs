@@ -3,20 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ServerLibrary.Data;
 
 #nullable disable
 
-namespace ServerLibrary.Data.Migrations
+namespace ServerLibrary.Data.Migrations.MySQL
 {
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20250602170712_InitialMigration")]
-    partial class InitialMigration
+    [DbContext(typeof(AppDbContextMySql))]
+    partial class AppDbContextMySqlModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,16 +135,11 @@ namespace ServerLibrary.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CivilId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("FileNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("MedicalDiagnose")
                         .IsRequired()
@@ -155,9 +147,6 @@ namespace ServerLibrary.Data.Migrations
 
                     b.Property<string>("MedicalRecommendation")
                         .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Other")
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -185,10 +174,6 @@ namespace ServerLibrary.Data.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("FileNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Fullname")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -248,19 +233,11 @@ namespace ServerLibrary.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CivilId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("FileNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Other")
-                        .HasColumnType("longtext");
 
                     b.Property<int>("OvertimeTypeId")
                         .HasColumnType("int");
@@ -319,20 +296,12 @@ namespace ServerLibrary.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CivilId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<DateTime?>("Date")
                         .IsRequired()
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("FileNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Other")
-                        .HasColumnType("longtext");
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Punishment")
                         .IsRequired()
@@ -341,7 +310,7 @@ namespace ServerLibrary.Data.Migrations
                     b.Property<DateTime>("PunishmentDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("SanctionTypeId")
+                    b.Property<int>("SanctionTypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -433,19 +402,11 @@ namespace ServerLibrary.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CivilId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("FileNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("NumberOfDays")
                         .HasColumnType("int");
-
-                    b.Property<string>("Other")
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime(6)");
@@ -540,7 +501,9 @@ namespace ServerLibrary.Data.Migrations
                 {
                     b.HasOne("BaseLibrary.Entities.SanctionType", "SanctionType")
                         .WithMany("Sanctions")
-                        .HasForeignKey("SanctionTypeId");
+                        .HasForeignKey("SanctionTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("SanctionType");
                 });

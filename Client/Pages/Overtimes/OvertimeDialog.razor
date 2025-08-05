@@ -1,0 +1,79 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="@Title">
+	<ChildContent>
+		<EditForm Model="Overtime" Enhance OnSubmit="Save">
+			<div class="card border-success">
+				<div class="card-body">
+					<div class="form-group">
+						<label class="form-label">Employee ID</label>
+						<input type="text" class="form-control" @bind="Overtime.EmployeeId" disabled />
+					</div>
+					<div class="form-group mt-2">
+						<label class="form-label">Start Date</label>
+						<InputDate @bind-Value="Overtime.StartDate" class="form-control" />
+					</div>
+					<div class="form-group mt-2">
+						<label class="form-label">End Date</label>
+						<InputDate @bind-Value="Overtime.EndDate" class="form-control" />
+					</div>
+					<div class="form-group mt-2">
+						<label class="form-label">Number of days</label>
+						<input value="@Overtime.NumberOfDays" class="form-control" disabled />
+					</div>
+					<div class="form-group mt-3 mb-3">
+						<label class="form-label">Type</label>
+						@{ string selectedValue = Overtime.OvertimeTypeId > 0 ? Overtime?.OvertimeType?.Name! : "Select an option"; }
+
+							<MudSelect T="string" Label="@selectedValue" Value="Overtime?.OvertimeTypeId.ToString()" ValueChanged="OnValueChanged">
+								@foreach (var type in OvertimeTypes)
+								{
+									<MudSelectItem Value="@type.Id.ToString()">@type.Name</MudSelectItem>
+								}
+							</MudSelect>
+					</div>
+				</div>
+			</div>
+		</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+
+@code {
+	[Parameter] public Overtime Overtime { get; set; } = new();
+	[Parameter] public List<OvertimeType> OvertimeTypes { get; set; } = [];
+	[Parameter] public EventCallback<Overtime> HandleSaveOperationEvent { get; set; }
+
+	public string Title { get; set; } = "Add Overtime";
+	private bool IsVisible { get; set; } = false;
+
+	private async void Save()
+	{
+		if(Overtime.OvertimeTypeId <= 0)
+		{
+			await alertService.ShowError("Please select an overtime type.");
+			return;
+		}
+
+		await HandleSaveOperationEvent.InvokeAsync(Overtime);
+	}
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void CloseDialog()
+	{
+		IsVisible = false;
+		StateHasChanged();
+	}
+
+	public void OnValueChanged(string value)
+	{
+		Overtime.OvertimeTypeId = int.Parse(value);
+	}
+
+	public void ChangeTitle(string title) => Title = title;
+}

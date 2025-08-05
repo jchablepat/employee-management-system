@@ -24,9 +24,9 @@ namespace ServerLibrary.Extensions
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true, // Esto valida la expiración
-                    ValidIssuer = jwtSection!.Issuer,
-                    ValidAudience = jwtSection.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection.Key!)),
+                    ValidIssuer = jwtSection?.Issuer,
+                    ValidAudience = jwtSection?.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection?.Key!)),
                 };
             });
 

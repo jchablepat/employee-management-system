@@ -1,0 +1,49 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="@Title">
+	<ChildContent>
+		<EditForm Model="VacationType" Enhance OnSubmit="Save">
+			<div class="card border-success">
+				<div class="card-body">
+					<div class="form-group">
+						<label class="form-label">Name</label>
+						<InputText @bind-Value="VacationType.Name" class="form-control" />
+					</div>
+				</div>
+			</div>
+		</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+
+@code {
+	[Parameter] public VacationType VacationType { get; set; } = new();
+	[Parameter] public EventCallback<VacationType> HandleSaveOperationEvent { get; set; }
+	public string Title { get; set; } = "Add Vacation Type";
+	private bool IsVisible { get; set; } = false;
+
+	private async void Save()
+	{
+		if (string.IsNullOrEmpty(VacationType.Name))
+		{
+			await alertService.ShowError("Please insert a vacation type.");
+			return;
+		}
+
+		await HandleSaveOperationEvent.InvokeAsync(VacationType);
+	}
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void CloseDialog()
+	{
+		IsVisible = false;
+		StateHasChanged();
+	}
+
+	public void ChangeTitle(string title) => Title = title;
+}

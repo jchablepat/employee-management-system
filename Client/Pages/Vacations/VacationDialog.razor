@@ -1,0 +1,92 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="@Title">
+	<ChildContent>
+		<EditForm Model="Vacation" Enhance OnSubmit="Save">
+			<div class="card border-success">
+				<div class="card-body">
+					<div class="form-group">
+						<label class="form-label">Employee ID</label>
+						<input type="text" class="form-control" @bind="Vacation.EmployeeId" disabled />
+					</div>
+					<div class="form-group mt-2">
+						<label class="form-label">Start Date</label>
+						<InputDate @bind-Value="Vacation.StartDate" class="form-control" />
+					</div>
+					<div class="form-group mt-2">
+						<label class="form-label">Number of days</label>
+						<InputNumber @bind-Value="@Vacation.NumberOfDays" class="form-control" />
+					</div>
+					<div class="form-group mt-2">
+						<label class="form-label">End Date</label>
+						<input @value="Vacation.EndDate.Date" class="form-control" disabled />
+					</div>
+					<div class="form-group mt-3 mb-3">
+						<label class="form-label">Type</label>
+						@{
+							string selectedValue = Vacation.VacationTypeId > 0 ? Vacation?.VacationType?.Name! : "Select an option";
+						}
+
+						<MudSelect T="string" Label="@selectedValue" Value="Vacation?.VacationTypeId!.ToString()" ValueChanged="OnValueChanged">
+							@foreach (var type in VacationTypes)
+							{
+								<MudSelectItem Value="@type.Id.ToString()">@type.Name</MudSelectItem>
+							}
+						</MudSelect>
+					</div>
+
+					@* Just for demonstration purposes, you can remove this if not needed *@
+					@* <InputFile class="form-control w-100" accept=".xlsx" OnChange="@FileUploaded" /> *@
+				</div>
+			</div>
+		</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+
+@code {
+	[Parameter] public Vacation Vacation { get; set; } = new();
+	[Parameter] public List<VacationType> VacationTypes { get; set; } = [];
+	[Parameter] public EventCallback<Vacation> HandleSaveOperationEvent { get; set; }
+	public string Title { get; set; } = "Add Vacation";
+	private bool IsVisible { get; set; } = false;
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void CloseDialog()
+	{
+		IsVisible = false;
+		StateHasChanged();
+	}
+
+	public void ChangeTitle(string title) => Title = title;
+
+	private void OnValueChanged(string value) => Vacation.VacationTypeId = int.Parse(value);
+
+	// Just for demonstration purposes, you can remove this if not needed
+	private async Task FileUploaded(InputFileChangeEventArgs e)
+	{
+		using (MemoryStream ms = new MemoryStream())
+		{
+			await e.GetMultipleFiles(1).First().OpenReadStream().CopyToAsync(ms);
+			ms.Position = 0;
+
+			List<Vacation> uploadedList = await ExcelService.Read<Vacation>(ms);
+		}
+	}
+
+	private async void Save()
+	{
+		if (Vacation.VacationTypeId <= 0)
+		{
+			await alertService.ShowError("Please select a vacation type.");
+			return;
+		}
+
+		await HandleSaveOperationEvent.InvokeAsync(Vacation);
+	}
+}

@@ -1,39 +1,89 @@
 ﻿<div class="container-fluid">
 	<div class="row">
 		<div class="col-lg-2 cursorStyle">
-			<div class="card border-primary">
-				<div class="card-header"><i class="bi bi-people text-primary"></i> Employees</div>
+			<div class="card border-primary" @onclick="EmployeeClicked">
+				<div class="card-header">
+					<i class="bi bi-people text-primary"></i> Employees
+					<span class="badge bg-primary fs-6">@Employees.Count</span>
+				</div>
 			</div>
 		</div>
 
 		<div class="col-lg-2 cursorStyle">
-			<div class="card border-success">
-				<div class="card-header"><i class="bi bi-backpack3 text-primary"></i> Vacation</div>
+			<div class="card border-success" @onclick="VacationClicked">
+				<div class="card-header">
+					<i class="bi bi-backpack3 text-success"></i> Vacation
+					<span class="badge bg-success fs-6">@Vacations.Count</span>
+				</div>
 			</div>
 		</div>
 
 		<div class="col-lg-2 cursorStyle">
-			<div class="card border-success">
-				<div class="card-header"><i class="bi bi-stopwatch text-danger"></i> Overtime</div>
+			<div class="card border-danger" @onclick="OvertimeClicked">
+				<div class="card-header">
+					<i class="bi bi-stopwatch text-danger"></i> Overtime
+					<span class="badge bg-danger fs-6">@Overtimes.Count</span>
+				</div>
 			</div>
 		</div>
 
 		<div class="col-lg-2 cursorStyle">
-			<div class="card border-success">
-				<div class="card-header"><i class="bi bi-hospital text-warning"></i> Doctor</div>
+			<div class="card border-warning" @onclick="HealthClicked">
+				<div class="card-header">
+					<i class="bi bi-hospital text-warning"></i> Health
+					<span class="badge bg-warning fs-6">@Health.Count</span>
+				</div>
 			</div>
 		</div>
 
 		<div class="col-lg-2 cursorStyle">
-			<div class="card border-success">
-				<div class="card-header"><i class="bi bi-x-octagon text-info"></i> Sanctions</div>
+			<div class="card border-info" @onclick="SanctionClicked">
+				<div class="card-header">
+					<i class="bi bi-x-octagon text-info"></i> Sanctions
+					<span class="badge bg-info fs-6">@Sanctions.Count</span>
+				</div>
 			</div>
 		</div>
 
 		<div class="col-lg-2 cursorStyle">
-			<div class="card border-success">
-				<div class="card-header"><i class="bi bi-slack text-dark"></i> Departments</div>
+			<div class="card border-dark" @onclick="DepartmentClicked">
+				<div class="card-header">
+					<i class="bi bi-slack text-dark"></i> Departments
+					<span class="badge bg-dark fs-6">@Departments.Count</span>
+				</div>
 			</div>
 		</div>
 	</div>
 </div>
+
+@code {
+	private List<Employee> Employees { get; set; } = new();
+	private List<Vacation> Vacations { get; set; } = new();
+	private List<Overtime> Overtimes { get; set; } = new();
+	private List<Doctor> Health { get; set; } = new();
+	private List<Sanction> Sanctions { get; set; } = new();
+	private List<Department> Departments { get; set; } = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		allState.Action += StateHasChanged;
+		await LoadDefaults();
+	}
+
+	private async Task LoadDefaults()
+	{
+		Employees = await employeeService.GetAll(Constants.EmployeeBaseUrl);
+		Departments = await departmentService.GetAll(Constants.DepartmentBaseUrl);
+		Overtimes = await overtimeService.GetAll(Constants.OvertimeBaseUrl);
+		Sanctions = await sanctionService.GetAll(Constants.SanctionBaseUrl);
+		Vacations = await vacationService.GetAll(Constants.VacationBaseUrl);
+		Health = await doctorService.GetAll(Constants.DoctorBaseUrl);
+	}
+
+	private void EmployeeClicked() => allState.EmployeeClicked();
+	private void VacationClicked() => allState.VacationClicked();
+	private void OvertimeClicked() => allState.OvertimeClicked();
+	private void HealthClicked() => allState.HealthClicked();
+	private void SanctionClicked() => allState.SanctionClicked();
+	private void DepartmentClicked() => allState.DepartmentClicked();
+}

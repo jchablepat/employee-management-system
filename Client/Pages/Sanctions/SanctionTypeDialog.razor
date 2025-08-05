@@ -1,0 +1,49 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="@Title">
+	<ChildContent>
+		<EditForm Model="SanctionType" Enhance OnSubmit="Save">
+			<div class="card border-success">
+				<div class="card-body">
+					<div class="form-group">
+						<label class="form-label">Name</label>
+						<InputText @bind-Value="SanctionType.Name" class="form-control" />
+					</div>
+				</div>
+			</div>
+		</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+
+@code {
+	[Parameter] public SanctionType SanctionType { get; set; } = new();
+	[Parameter] public EventCallback<SanctionType> HandleSaveOperationEvent { get; set; }
+	public string Title { get; set; } = "Add Sanction Type";
+	private bool IsVisible { get; set; } = false;
+
+	private async void Save()
+	{
+		if (string.IsNullOrEmpty(SanctionType.Name))
+		{
+			await alertService.ShowError("Please insert an sanction type.");
+			return;
+		}
+
+		await HandleSaveOperationEvent.InvokeAsync(SanctionType);
+	}
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void CloseDialog()
+	{
+		IsVisible = false;
+		StateHasChanged();
+	}
+
+	public void ChangeTitle(string title) => Title = title;
+}

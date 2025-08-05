@@ -23,7 +23,7 @@ namespace ClientLibrary.Services.Implementations
         {
             var httpClient = getHttpClient.GetPublicHttpClient();
             var result = await httpClient.PostAsJsonAsync(AuthUrl + "/login", user);
-            if (!result.IsSuccessStatusCode) return new LoginResponse(false, "Failed to create user");
+            if (!result.IsSuccessStatusCode) return new LoginResponse(false, "Failed to login");
 
             return await result.Content.ReadFromJsonAsync<LoginResponse>();
         }

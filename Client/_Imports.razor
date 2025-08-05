@@ -21,6 +21,10 @@
 
 @using MudBlazor
 
+@using Client.Pages.Overtimes
+@using Client.Pages.Sanctions
+@using Client.Pages.Vacations
+@using Client.Pages.Doctors
 @using Client.Pages.Partials
 @using Client.Pages.Admin
 @using Client.Pages.Content.Departments
@@ -42,6 +46,9 @@
 @* SweetAlert2 service *@
 @inject IAlertService alertService
 
+@inject IExcelService ExcelService
+@inject IPdfService PdfService
+
 @inject IGenericService<GeneralDepartment> generalDepartmentService
 @inject IGenericService<Department> departmentService
 @inject IGenericService<Branch> branchService
@@ -49,3 +56,11 @@
 @inject IGenericService<City> cityService
 @inject IGenericService<Town> townService
 @inject IGenericService<Employee> employeeService
+
+@inject IGenericService<Doctor> doctorService
+@inject IGenericService<Overtime> overtimeService
+@inject IGenericService<OvertimeType> overtimeTypeService
+@inject IGenericService<Sanction> sanctionService
+@inject IGenericService<SanctionType> sanctionTypeService
+@inject IGenericService<Vacation> vacationService
+@inject IGenericService<VacationType> vacationTypeService

@@ -1,0 +1,80 @@
+﻿<CustomModal @bind-IsVisible="IsVisible" Title="Add Employee's Sanction">
+	<ChildContent>
+		<EditForm Model="Sanction" Enhance OnSubmit="Save">
+			<div class="card border-success">
+				<div class="card-body">
+					<div class="form-group">
+						<label class="form-label">Employee ID</label>
+						<input type="text" class="form-control" @bind="Sanction.EmployeeId" disabled />
+					</div>
+
+					<div class="form-group mt-2">
+						<label class="form-label">Ocurring Date</label>
+						<InputDate class="form-control" @bind-Value="Sanction.Date" />
+					</div>
+
+					<div class="form-group mt-2">
+						<label class="form-label">Punishment Date</label>
+						<InputDate class="form-control" @bind-Value="Sanction.PunishmentDate" />
+					</div>
+
+					<div class="form-group mt-2">
+						<label class="form-label">Punishment</label>
+						<InputTextArea class="form-control" @bind-Value="Sanction.Punishment" />
+					</div>
+
+					<div class="form-group mt-2">
+						<label class="form-label">Type</label>
+						@{
+							string selectedValue = Sanction.SanctionTypeId > 0 ? Sanction?.SanctionType?.Name! : "Select an option";
+						}
+
+						<MudSelect T="string" Label="@selectedValue" Value="Sanction?.SanctionTypeId.ToString()" ValueChanged="OnValueChanged">
+							@foreach (var type in SanctionTypes)
+							{
+								<MudSelectItem Value="@type.Id.ToString()">@type.Name</MudSelectItem>
+							}
+						</MudSelect>
+					</div>
+				</div>
+			</div>
+		</EditForm>
+	</ChildContent>
+	<FooterContent>
+		<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+	</FooterContent>
+</CustomModal>
+
+@code {
+	[Parameter] public Sanction Sanction { get; set; } = new();
+	[Parameter] public List<SanctionType> SanctionTypes { get; set; } = [];
+	[Parameter] public EventCallback<Sanction> HandleSaveOperationEvent { get; set; }
+	public string Title { get; set; } = "Add Sanction";
+	private bool IsVisible { get; set; } = false;
+
+	public void OpenDialog()
+	{
+		IsVisible = true;
+		StateHasChanged();
+	}
+
+	public void CloseDialog()
+	{
+		IsVisible = false;
+		StateHasChanged();
+	}
+
+	private async void Save()
+	{
+		if (Sanction.SanctionTypeId <= 0)
+		{
+			await alertService.ShowError("Please select a sanction type.");
+			return;
+		}
+		await HandleSaveOperationEvent.InvokeAsync(Sanction);
+	}
+
+	private void OnValueChanged(string value) => Sanction.SanctionTypeId = int.Parse(value);
+
+	public void ChangeTitle(string title) => Title = title;
+}

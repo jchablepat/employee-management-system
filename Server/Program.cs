@@ -19,12 +19,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<JwtSection>(builder.Configuration.GetSection("JwtSection"));
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    //options.UseSqlServer(connectionString ?? throw new InvalidOperationException("Sorry your connection is not found!"));
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-});
+// Configura la conexión a la base de datos
+builder.Services.AddDatabaseConfiguration(builder.Configuration);
 
 // Configurar JWT
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -37,6 +33,13 @@ builder.Services.AddScoped<IGenericRepository<Country>, CountryRepository>();
 builder.Services.AddScoped<IGenericRepository<City>, CityRepository>();
 builder.Services.AddScoped<IGenericRepository<Town>, TownRepository>();
 builder.Services.AddScoped<IGenericRepository<Employee>, EmployeeRepository>();
+builder.Services.AddScoped<IGenericRepository<Doctor>, DoctorRepository>();
+builder.Services.AddScoped<IGenericRepository<Overtime>, OvertimeRepository>();
+builder.Services.AddScoped<IGenericRepository<OvertimeType>, OvertimeTypeRepository>();
+builder.Services.AddScoped<IGenericRepository<Sanction>, SanctionRepository>();
+builder.Services.AddScoped<IGenericRepository<SanctionType>, SanctionTypeRepository>();
+builder.Services.AddScoped<IGenericRepository<Vacation>, VacationRepository>();
+builder.Services.AddScoped<IGenericRepository<VacationType>, VacationTypeRepository>();
 
 builder.Services.AddHealthChecks().AddCheck<SystemResourcesHealthCheck>("System Resources");
 builder.Services.AddTransient<AdminDataSeeder>();
@@ -58,9 +61,9 @@ if (app.Environment.IsDevelopment())
 {
     //app.UseSwagger();
     //app.UseSwaggerUI();
-} else
-{
-    // Ejecutar migraciones automáticamente al iniciar la aplicación
+} 
+else {
+    // Ejecutar migraciones automaticamente al iniciar la aplicacion
     using var scope = app.Services.CreateScope();
     try
     {

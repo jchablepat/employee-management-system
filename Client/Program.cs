@@ -34,11 +34,25 @@ builder.Services.AddScoped<IGenericService<Branch>, GenericService<Branch>>();
 builder.Services.AddScoped<IGenericService<Country>, GenericService<Country>>();
 builder.Services.AddScoped<IGenericService<City>, GenericService<City>>();
 builder.Services.AddScoped<IGenericService<Town>, GenericService<Town>>();
+
+builder.Services.AddScoped<IGenericService<Vacation>, GenericService<Vacation>>();
+builder.Services.AddScoped<IGenericService<VacationType>, GenericService<VacationType>>();
+
+builder.Services.AddScoped<IGenericService<Overtime>, GenericService<Overtime>>();
+builder.Services.AddScoped<IGenericService<OvertimeType>, GenericService<OvertimeType>>();
+
+builder.Services.AddScoped<IGenericService<Sanction>, GenericService<Sanction>>();
+builder.Services.AddScoped<IGenericService<SanctionType>, GenericService<SanctionType>>();
+
+builder.Services.AddScoped<IGenericService<Doctor>, GenericService<Doctor>>();
 builder.Services.AddScoped<IGenericService<Employee>, GenericService<Employee>>();
-builder.Services.AddScoped<IAlertService, AlertService>();
+
 builder.Services.AddScoped<AllState>();
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<SfDialogService>();
+builder.Services.AddScoped<IAlertService, AlertService>();
+builder.Services.AddScoped<IExcelService, ExcelService>();
+builder.Services.AddScoped<IPdfService, PdfService>();
 
 await builder.Build().RunAsync();
